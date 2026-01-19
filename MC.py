@@ -6,7 +6,7 @@ So = 58
 r = 0.1
 q = 0.04
 
-def underlying_price(r, q, dt, sgm, So, nbr_sim, T):
+def underlying_price(r, q, dt, sgm, So, nbr_sim, T, K):
     start_time = time.time()
     T = np.arange(0, T, dt)
     Maturity = np.ones(shape = (nbr_sim, T.size)) * dt
@@ -32,7 +32,10 @@ def underlying_price(r, q, dt, sgm, So, nbr_sim, T):
     ax.set_title("Monte-Carlo simulation for WTI oil")
     ax.set(xlabel = "time (year)", ylabel = "price (dollar)")
     ax.plot(T, St, '-', linewidth = 0.5)
+    A = np.array([moyenne - K, 0])
+    payoff = np.exp(- r * T) * np.max(A,axis = 0)
+    print(payoff)
     plt.show()
     return()
 
-underlying_price(r, q, 0.0001, 0.03, So, 1000, 0.3)
+underlying_price(r, q, 0.0001, 0.03, So, 1000, 0.3, 50)

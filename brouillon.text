@@ -1,0 +1,8 @@
+
+class Underlying:
+    def __init__(self, r: float,q: float, St: float, dt: float, sgm: float):
+        self.r = r
+        self.q = q
+        self.So = So
+        self.dt = dt
+        self.sgm = sgm
