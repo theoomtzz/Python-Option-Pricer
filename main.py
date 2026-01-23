@@ -1,62 +1,61 @@
-import numpy as np
 import matplotlib.pyplot as plt
-import time
+from market_data import MarketEnvironment, Underlying, EuropeanOption, AsianOption
+from engine import price_monte_carlo, bs_close_form, delta_bump, delta_BS
 
+# --- Main ---
+def main():
 
-# Class 
+    # Paramètres
+    seed_val = 122
+    r_rate = 0.05
+    dt_step = 1/252 # 1 jour de trading
+    n_sims = 10000  # Plus de sims pour converger mieux
 
-class Market_Env():
-    def __init__(self, vol, r, q):
-        self.vol = vol # volatility
-        self.r = r # free risk rate
-        self.q = q 
-        pass
- 
-class Underlying():
-    def __init__(self, ticker, price, market_env):
-        self.ticker = ticker
-        self.price = price
-        self.price = market_env
+    # Création des underlying
+    apple = Underlying("AAPL", price = 110, dividend = 0.04, volatility = 0.20)
 
-class Option():
-    def __init__(self, cat, underlying, maturity, strike):
-        self.cat = cat # Call, Put
-        self.maturity = maturity
-        self.strike = strike
-        self.underlying = underlying
-
-    def payoff(self, paths):
-        """
-        paths: numpy array de forme (M, N+1) 
-        M = nombre de simulations, N = pas de temps
-        """
-        pass
-
-class EuropeanOption(Option):
-        
-        def payoff(self, paths, r):
-            if self.cat == "call":
-                res = np.exp(r * self.maturity) * max([np.sum(paths[-1, :]) / paths.shape[1] - self.strike,0])
-            if self.cat == "put":
-                res = np.exp(r * self.maturity) * max([self.strike - np.sum(paths[-1, :]) / paths.shape[1],0]) 
-            return res
+    # Création de l'environnement de marché
+    env = MarketEnvironment(risk_free_rate = r_rate)
     
+    # Création des contrats
+    call_eur = EuropeanOption("call", apple, maturity = 1.0, strike = 100)
+    put_asian = AsianOption("put", apple, maturity = 1.0, strike = 100)
+    
+    # MC
+    t, paths_eur = price_monte_carlo(call_eur, env, dt_step, n_sims, seed_val)
+    _, paths_asian = price_monte_carlo(put_asian, env, dt_step, n_sims, seed_val)
+ 
+    # Pricing
+    mc_price_call_eur = call_eur.compute_present_value(paths_eur, env.risk_free_rate)
+    mc_price_put_asian = put_asian.compute_present_value(paths_asian, env.risk_free_rate)
+    bs_price_call_eur = bs_close_form(call_eur, env)
 
-def main(step_time, nbr_sim):
-    equities_env = Market_Env(0.03, 0.05, 0.02)
-    apple_underlying = Underlying("AAPL", 120, equities_env)
-    european_call = EuropeanOption("call", apple_underlying, 1, 125)
-    time_axis = np.arange(0, european_call.strike, step_time)
-    Maturity = np.ones(shape = (nbr_sim, time_axis.size)) * step_time
-    Maturity[:,0] = 0
-    drift = (( european_call.underlying. - q) - (sgm**2) / 2) * Maturity
-    diffusion = sgm * np.random.normal(0, np.sqrt(Maturity))
-    int_european_call_price_paths = drift + diffusion
-    int_european_call_price_paths = np.cumsum(int_european_call_price_paths, 1)
-    int_european_call_price_paths = apple_underlying.price * np.exp(int_european_call_price_paths)
-    european_call_price_paths = np.transpose(St)
-    moyenne = np.sum(St[-1, :]) / St.shape[1]
-    A = np.array([moyenne - K, 0])
-    european_call_price = 
-    end_time = time.time()
-    return(payoff)
+    # Grecs
+    d_bump_call_eur = delta_bump(call_eur, env, dt_step, n_sims, seed_val)
+    d_bump_put_asian = delta_bump(put_asian, env, dt_step, n_sims, seed_val)
+    d_bs_call_eur = delta_BS(call_eur, env.risk_free_rate)
+    
+    # Affichage
+    print("\n")
+    print(f"----------- Pricing Report for {apple.ticker} -----------")
+    print(f"Spot: {apple.price}, Strike: {call_eur.strike}, Vol: {apple.volatility}, T: {call_eur.maturity}")
+    print("-" * 47)
+    print(f"BS Closed Form (Eur Call) : {bs_price_call_eur:.4f}")
+    print(f"MC (Eur Call)             : {mc_price_call_eur:.4f} (Err: {abs(mc_price_call_eur - bs_price_call_eur):.4f})")
+    print(f"MC (Asian Put)           : {mc_price_put_asian:.4f}")
+    print("-" * 47)
+    print(f"Delta bump and value (Eur Call) : {d_bump_call_eur:.4f}")
+    print(f"Delta BS (Eur Call)             : {d_bs_call_eur:.4f} (Err: {abs(d_bs_call_eur - d_bump_call_eur):.4f})")
+    print(f"Delta bump and value (Asian Put) : {d_bump_put_asian:.4f}")
+    print("-" * 47)
+    print("\n")
+
+    #Petit check visuel (Optionnel)
+    #fig, ax = plt.subplots()
+    #ax.set_title("Monte Carlo Paths - AAPL")
+    #ax.set(xlabel = "Time (Years)", ylabel = "Price (dollar)")
+    #ax.plot(t, paths_eur[:, 0:20], '-', linewidth = 0.5)
+    #plt.show()
+
+if __name__ == "__main__":
+    main()
