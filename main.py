@@ -71,7 +71,7 @@ def run_surface():
 
     r_rate = 0.0475
     market_env = MarketEnvironment(r_rate)
-    apple = Underlying("AAPL", 0.1, 242.84, 0 )
+    apple = Underlying("AAPL", 0.1, 242.84, 0)
     path = "/Users/theomettez/Desktop/PostECE/Pricer/data/apple_option_cote.csv"
     t = "6/12/2024" # Today Date 
     
@@ -81,16 +81,17 @@ def run_surface():
     df = cleaning(df)
     # Add market price and spreand
     df = add_data(df)
-
+    print(df.describe())
     print(df)
     # Récuperation des volaitlité implicite
     
-    call_eur = Option('call', apple, np.array(df['Expiry']), np.array(df['Strike']), "2025-06-12")
+    call_eur = Option('call', apple, np.array(df['Expiry']), np.array(df['Strike']))
 
 
     df['bs_price'] = bs_close_form(call_eur, market_env)
+   
 
-    print(df)
+    #print(df)
     
 
     # Tracé des smils
@@ -101,8 +102,8 @@ def run_surface():
 
 if __name__ == "__main__":
     
-    run_compare()
-    #run_surface()
+    #run_compare()
+    run_surface()
 
 
 
