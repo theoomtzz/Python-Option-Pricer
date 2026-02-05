@@ -1,18 +1,47 @@
 import numpy as np
-
-# --- Classes ---
+import yfinance as yf
 
 class MarketEnvironment:
-    underlyings = []
     def __init__(self, risk_free_rate):
         self.risk_free_rate = risk_free_rate
         
 class Underlying:
-    def __init__(self, ticker, price, dividend, volatility):
+    def __init__(self, ticker, volatility, price, dividend):
         self.ticker = ticker
         self.price = price
         self.dividend = dividend
         self.volatility = volatility
+        
+        """ si un jour API 
+        # Dividend yield (q)
+        try:
+            info = yf.Ticker(self.ticker).info
+            q = info.get("dividendYield", None)
+
+            if q is None:
+                raise ValueError("No dividendYield in Yahoo")
+
+            self.dividend = float(q)
+
+        except Exception as e:
+            print(f"[WARN] Dividend not found for {self.ticker}, setting q = 0")
+            self.dividend = 0.0
+
+        # Spot price
+        try:
+            self.price = yf.Ticker(self.ticker).fast_info["lastPrice"]
+            
+        except Exception:
+            print(f"[WARN] Price not found for {self.ticker}, setting S0 = None")
+            self.price = None"""
+        
+
+
+    """def __init__(self, ticker, price, dividend, volatility):
+        self.ticker = ticker
+        self.price = price
+        self.dividend = dividend
+        self.volatility = volatility"""
 
 class Option:
     def __init__(self, category, underlying, maturity, strike):
@@ -20,6 +49,7 @@ class Option:
         self.maturity = maturity
         self.strike = strike
         self.underlying = underlying
+        self.price = None
 
 class EuropeanOption(Option):
     def __init__(self, category, underlying, maturity, strike):
@@ -56,3 +86,4 @@ class AsianOption(Option):
 
          # Actualisation
         return np.exp(-r * self.maturity) * np.mean(payoff)
+    

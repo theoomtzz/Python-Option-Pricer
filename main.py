@@ -1,18 +1,26 @@
 import matplotlib.pyplot as plt
-from market_data import MarketEnvironment, Underlying, EuropeanOption, AsianOption
-from engine import price_monte_carlo, bs_close_form, delta_bump, delta_BS
+import numpy as np
+from instrument.instruments import MarketEnvironment, Underlying, EuropeanOption, AsianOption, Option
+from pricing.monte_carlo import price_monte_carlo
+from pricing.black_scholes import bs_close_form
+from risk.grecs import delta_bump, delta_bs
+#from data.scraping import scrap_option_data
+#from volatility.implied_vol import implied_vol_cal
+from data.get_data import get_data
+from data.cleaning import cleaning
+from data.add_data import add_data
+import yfinance as yf
 
-# --- Main ---
-def main():
+def run_compare():
 
     # Paramètres
     seed_val = 122
     r_rate = 0.05
     dt_step = 1/252 # 1 jour de trading
-    n_sims = 10000  # Plus de sims pour converger mieux
+    n_sims = 10000
 
     # Création des underlying
-    apple = Underlying("AAPL", price = 110, dividend = 0.04, volatility = 0.20)
+    apple = Underlying("AAPL", 0.80, 10, 0)
 
     # Création de l'environnement de marché
     env = MarketEnvironment(risk_free_rate = r_rate)
@@ -33,8 +41,8 @@ def main():
     # Grecs
     d_bump_call_eur = delta_bump(call_eur, env, dt_step, n_sims, seed_val)
     d_bump_put_asian = delta_bump(put_asian, env, dt_step, n_sims, seed_val)
-    d_bs_call_eur = delta_BS(call_eur, env.risk_free_rate)
-    
+    d_bs_call_eur = delta_bs(call_eur, env.risk_free_rate)
+
     # Affichage
     print("\n")
     print(f"----------- Pricing Report for {apple.ticker} -----------")
@@ -50,12 +58,53 @@ def main():
     print("-" * 47)
     print("\n")
 
-    #Petit check visuel (Optionnel)
+    # Check Visuel
     #fig, ax = plt.subplots()
     #ax.set_title("Monte Carlo Paths - AAPL")
-    #ax.set(xlabel = "Time (Years)", ylabel = "Price (dollar)")
+    #ax.set(xlabel = "Time (Years)", ylabel = "Price (dollar)")()
     #ax.plot(t, paths_eur[:, 0:20], '-', linewidth = 0.5)
     #plt.show()
 
+    return
+
+def run_surface():
+
+    r_rate = 0.0475
+    market_env = MarketEnvironment(r_rate)
+    apple = Underlying("AAPL", 0.1, 242.84, 0 )
+    path = "/Users/theomettez/Desktop/PostECE/Pricer/data/apple_option_cote.csv"
+    t = "6/12/2024" # Today Date 
+    
+    # Upload data from csv
+    df = get_data(path)
+    # Data processing
+    df = cleaning(df)
+    # Add market price and spreand
+    df = add_data(df)
+
+    print(df)
+    # Récuperation des volaitlité implicite
+    
+    call_eur = Option('call', apple, np.array(df['Expiry']), np.array(df['Strike']), "2025-06-12")
+
+
+    df['bs_price'] = bs_close_form(call_eur, market_env)
+
+    print(df)
+    
+
+    # Tracé des smils
+
+    # Creation d'un objet pour utiliser les pricer deja fait  
+
+    return
+
 if __name__ == "__main__":
-    main()
+    
+    run_compare()
+    #run_surface()
+
+
+
+
+

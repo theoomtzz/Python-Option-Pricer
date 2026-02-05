@@ -5,7 +5,7 @@
 __pycache__/
 *.py[cod]
 
-# Environnement virtuel (Trop lourd, ne jamais envoyer sur GitHub)
+# Environnement virtuel (trop lourd)
 .venv/
 venv/
 env/
