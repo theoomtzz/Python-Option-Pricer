@@ -20,42 +20,42 @@ def run_compare():
     n_sims = 10000
 
     # Création des underlying
-    apple = Underlying("AAPL", 0.80, 10, 0)
+    apple = Underlying("AAPL", 0.2, 89, 0)
 
     # Création de l'environnement de marché
     env = MarketEnvironment(risk_free_rate = r_rate)
     
     # Création des contrats
-    call_eur = EuropeanOption("call", apple, maturity = 1.0, strike = 100)
-    put_asian = AsianOption("put", apple, maturity = 1.0, strike = 100)
+    call_eur = EuropeanOption("call", apple, maturity = 1.0, strike = 90, valuation_time = 0.0)
+   # put_asian = AsianOption("put", apple, maturity = 1.0, strike = 100, 0)
     
     # MC
     t, paths_eur = price_monte_carlo(call_eur, env, dt_step, n_sims, seed_val)
-    _, paths_asian = price_monte_carlo(put_asian, env, dt_step, n_sims, seed_val)
+    #_, paths_asian = price_monte_carlo(put_asian, env, dt_step, n_sims, seed_val)
  
     # Pricing
     mc_price_call_eur = call_eur.compute_present_value(paths_eur, env.risk_free_rate)
-    mc_price_put_asian = put_asian.compute_present_value(paths_asian, env.risk_free_rate)
+    #mc_price_put_asian = put_asian.compute_present_value(paths_asian, env.risk_free_rate)
     bs_price_call_eur = bs_close_form(call_eur, env)
 
     # Grecs
     d_bump_call_eur = delta_bump(call_eur, env, dt_step, n_sims, seed_val)
-    d_bump_put_asian = delta_bump(put_asian, env, dt_step, n_sims, seed_val)
+    #d_bump_put_asian = delta_bump(put_asian, env, dt_step, n_sims, seed_val)
     d_bs_call_eur = delta_bs(call_eur, env.risk_free_rate)
 
     # Affichage
     print("\n")
-    print(f"----------- Pricing Report for {apple.ticker} -----------")
-    print(f"Spot: {apple.price}, Strike: {call_eur.strike}, Vol: {apple.volatility}, T: {call_eur.maturity}")
-    print("-" * 47)
+    print(f"-------------- Pricing Report for {apple.ticker} --------------")
+    print(f"Spot: {apple.price}, Strike: {call_eur.strike}, Vol: {apple.volatility}, Time to maturity: {call_eur.time_to_maturity}")
+    print("-" * 53)
     print(f"BS Closed Form (Eur Call) : {bs_price_call_eur:.4f}")
     print(f"MC (Eur Call)             : {mc_price_call_eur:.4f} (Err: {abs(mc_price_call_eur - bs_price_call_eur):.4f})")
-    print(f"MC (Asian Put)           : {mc_price_put_asian:.4f}")
-    print("-" * 47)
+   # print(f"MC (Asian Put)           : {mc_price_put_asian:.4f}")
+    print("-" * 53)
     print(f"Delta bump and value (Eur Call) : {d_bump_call_eur:.4f}")
     print(f"Delta BS (Eur Call)             : {d_bs_call_eur:.4f} (Err: {abs(d_bs_call_eur - d_bump_call_eur):.4f})")
-    print(f"Delta bump and value (Asian Put) : {d_bump_put_asian:.4f}")
-    print("-" * 47)
+   # print(f"Delta bump and value (Asian Put) : {d_bump_put_asian:.4f}")
+    print("-" * 53)
     print("\n")
 
     # Check Visuel
@@ -102,8 +102,8 @@ def run_surface():
 
 if __name__ == "__main__":
     
-    #run_compare()
-    run_surface()
+    run_compare()
+    #run_surface()
 
 
 

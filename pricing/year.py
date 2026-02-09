@@ -37,7 +37,7 @@ import numpy as np
 import pandas as pd
 
 
-"""
+
 def year_fraction_act365(start_date_str, date_array):
     start = pd.to_datetime(start_date_str)
 
@@ -50,4 +50,4 @@ def year_fraction_act365(start_date_str, date_array):
     # Méthode universelle: convertir en "jours" par division
     delta_days = (delta / np.timedelta64(1, "D")).astype(float)
 
-    return delta_days / 365.0"""
+    return delta_days / 365.0

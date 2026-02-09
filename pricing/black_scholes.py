@@ -4,12 +4,13 @@ from scipy.stats import norm
 
 def bs_close_form(option, market_env):
     T = option.maturity
+    t = option.valuation_time
     q = option.underlying.dividend
     sgm = option.underlying.volatility
     So = option.underlying.price
     K = option.strike
     r = market_env.risk_free_rate
-    dt = T - 0
+    dt = option.time_to_maturity
 
     d1 = (np.log(So/K) + (r - q + 0.5 * sgm**2) * dt) / (sgm * np.sqrt(dt))
     d2 = d1 - sgm * np.sqrt(dt)

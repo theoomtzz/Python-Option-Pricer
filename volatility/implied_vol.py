@@ -1,6 +1,6 @@
 
 from pricing.black_scholes import bs_close_form
-from instrument.year import year_fraction_from_today
+from pricing.year import year_fraction_from_today
 from risk.grecs import vega_bs
 
 import numpy as np

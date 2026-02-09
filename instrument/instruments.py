@@ -44,17 +44,23 @@ class Underlying:
         self.volatility = volatility"""
 
 class Option:
-    def __init__(self, category, underlying, maturity, strike):
+    def __init__(self, category, underlying, maturity, strike, valuation_time = 0.0):
         self.category = category.lower()
+        self.underlying = underlying
         self.maturity = maturity
         self.strike = strike
-        self.underlying = underlying
+        self.valuation_time = valuation_time
         self.price = None
+        
 
 class EuropeanOption(Option):
-    def __init__(self, category, underlying, maturity, strike):
-        super().__init__(category, underlying, maturity, strike)
+    def __init__(self, category, underlying, maturity, strike, valuation_time):
+        super().__init__(category, underlying, maturity, strike, valuation_time)
         self.type = "European"
+
+    @property
+    def time_to_maturity(self):
+        return self.maturity - self.valuation_time
 
     def compute_present_value(self, price_paths, r):
         # Prix final à maturité (Dernière ligne)
